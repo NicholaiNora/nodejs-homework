@@ -1,19 +1,15 @@
-// const fs = require('fs/promises')
 
-const listContacts = async () => {}
+import fs from 'fs/promises';
 
-const getContactById = async (contactId) => {}
+const listContacts = async () => {};
 
-const removeContact = async (contactId) => {}
+const getContactById = async (contactId) => {};
 
-const addContact = async (body) => {}
+const removeContact = async (contactId) => {};
 
-const updateContact = async (contactId, body) => {}
+const addContact = async (body) => {};
 
-module.exports = {
-  listContacts,
-  getContactById,
-  removeContact,
-  addContact,
-  updateContact,
-}
+const updateContact = async (contactId, body) => {};
+
+//prettier-ignore
+export { listContacts, getContactById, removeContact, addContact, updateContact };
