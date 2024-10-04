@@ -1,15 +1,15 @@
 import express from "express";
 // prettier-ignore
-import { listContacts, getContactById, removeContact, addContact, updateContact } from "../../models/contacts.js";
-import { contactValidation } from "../../validation/validation.js";
+import { addContact, deleteContactById, getAllContacts, getContactById, updateContactById, updateStatusContact } from "../../controllers/contactsControllers.js";
 
 const router = express.Router();
 
 // GET http://localhost:3000/api/contacts/
-router.get("/", async (_req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
-    const result = await listContacts();
-    res.json(result);
+    const result = await getAllContacts(req, res, next);
+
+    return result;
   } catch (error) {
     next(error);
   }
@@ -18,14 +18,9 @@ router.get("/", async (_req, res, next) => {
 // GET http://localhost:3000/api/contacts/{id}
 router.get("/:contactId", async (req, res, next) => {
   try {
-    const { contactId } = req.params;
-    const result = await getContactById(contactId);
+    const result = await getContactById(req, res, next);
 
-    if (!result) {
-      res.status(404).json({ message: "ID Not Found" });
-    }
-
-    res.json(result);
+    return result;
   } catch (error) {
     next(error);
   }
@@ -35,12 +30,9 @@ router.get("/:contactId", async (req, res, next) => {
 router.post("/", async (req, res, next) => {
   try {
     // Preventing lack of necessary data
-    const { error } = contactValidation.validate(req.body);
-    if (error) {
-      res.status(400).json({ message: "missing required name field" });
-    }
-    const result = await addContact(req.body);
-    res.status(201).json(result);
+    const result = await addContact(req, res, next);
+
+    return result;
   } catch (error) {
     next(error);
   }
@@ -49,14 +41,9 @@ router.post("/", async (req, res, next) => {
 // DELETE http://localhost:3000/api/contacts/{id}
 router.delete("/:contactId", async (req, res, next) => {
   try {
-    const { contactId } = req.params;
-    const result = await removeContact(contactId);
-    if (!result) {
-      res.status(404).json({ message: "ID Not Found" });
-    }
-    res.json({
-      message: "Contact deleted",
-    });
+    const result = await deleteContactById(req, res, next);
+
+    return result;
   } catch (error) {
     next(error);
   }
@@ -64,19 +51,19 @@ router.delete("/:contactId", async (req, res, next) => {
 
 router.put("/:contactId", async (req, res, next) => {
   try {
-    // Preventing lack of necessary data
-    const { error } = contactValidation.validate(req.body);
-    if (error) {
-      res.status(400).json({ message: "missing required name field" });
-    }
-    const { contactId } = req.params;
-    const result = await updateContact(contactId, req.body);
+    const result = await updateContactById(req, res, next);
 
-    if (!result) {
-      res.status(404).json({ message: "ID Not Found" });
-    }
+    return result;
+  } catch (error) {
+    next(error);
+  }
+});
 
-    res.json(result);
+router.patch("/:contactId/favorite", async (req, res, next) => {
+  try {
+    const result = await updateStatusContact(req, res, next);
+
+    return result;
   } catch (error) {
     next(error);
   }
