@@ -1,11 +1,12 @@
 import express from "express";
 // prettier-ignore
 import { addContact, deleteContactById, getAllContacts, getContactById, updateContactById, updateStatusContact } from "../../controllers/contactsControllers.js";
+import { authenticateToken } from "../../middlewares/authenticateToken.js";
 
 const router = express.Router();
 
 // GET http://localhost:3000/api/contacts/
-router.get("/", async (req, res, next) => {
+router.get("/", authenticateToken, async (req, res, next) => {
   try {
     const result = await getAllContacts(req, res, next);
 
@@ -16,7 +17,7 @@ router.get("/", async (req, res, next) => {
 });
 
 // GET http://localhost:3000/api/contacts/{id}
-router.get("/:contactId", async (req, res, next) => {
+router.get("/:contactId", authenticateToken, async (req, res, next) => {
   try {
     const result = await getContactById(req, res, next);
 
@@ -27,7 +28,7 @@ router.get("/:contactId", async (req, res, next) => {
 });
 
 // POST http://localhost:3000/api/contacts/
-router.post("/", async (req, res, next) => {
+router.post("/", authenticateToken, async (req, res, next) => {
   try {
     // Preventing lack of necessary data
     const result = await addContact(req, res, next);
@@ -39,7 +40,7 @@ router.post("/", async (req, res, next) => {
 });
 
 // DELETE http://localhost:3000/api/contacts/{id}
-router.delete("/:contactId", async (req, res, next) => {
+router.delete("/:contactId", authenticateToken, async (req, res, next) => {
   try {
     const result = await deleteContactById(req, res, next);
 
@@ -49,7 +50,7 @@ router.delete("/:contactId", async (req, res, next) => {
   }
 });
 
-router.put("/:contactId", async (req, res, next) => {
+router.put("/:contactId", authenticateToken, async (req, res, next) => {
   try {
     const result = await updateContactById(req, res, next);
 
@@ -59,7 +60,7 @@ router.put("/:contactId", async (req, res, next) => {
   }
 });
 
-router.patch("/:contactId/favorite", async (req, res, next) => {
+router.patch("/:contactId/favorite", authenticateToken, async (req, res, next) => {
   try {
     const result = await updateStatusContact(req, res, next);
 

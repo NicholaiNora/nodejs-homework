@@ -2,8 +2,14 @@ import { Contact } from "../models/contactsModel.js";
 // prettier-ignore
 import { contactValidation, favoriteValidation } from "../validation/validation.js";
 
-const getAllContacts = async (_req, res) => {
-  const result = await Contact.find();
+const getAllContacts = async (req, res) => {
+  const { page = 1, limit = 20, favorite } = req.query;
+  const queryFavorite = favorite === "true" ? { favorite: true } : favorite === "false" ? { favorite: false } : {};
+
+  const result = await Contact.find(queryFavorite)
+    .skip((page - 1) * limit)
+    .limit(parseInt(limit));
+  
   res.json(result);
 };
 
