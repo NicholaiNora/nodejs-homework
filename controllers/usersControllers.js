@@ -1,11 +1,13 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { Jimp } from "jimp";
+import fs from "fs/promises";
 import "dotenv/config";
+import path from "path";
 import { User } from "../models/usersModel.js";
-import {
-  signupValidation,
-  subscriptionValidation,
-} from "../validation/validation.js";
+// prettier-ignore
+import { signupValidation, subscriptionValidation } from "../validation/validation.js";
+import gravatar from "gravatar";
 
 const { SECRET_KEY } = process.env;
 
@@ -24,12 +26,20 @@ const signupUser = async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await User.create({ email, password: hashPassword });
+  // Create a link to the user's avatar with gravatar
+  const avatarURL = gravatar.url(email, { protocol: "http" });
+
+  const newUser = await User.create({
+    email,
+    password: hashPassword,
+    avatarURL,
+  });
 
   res.status(201).json({
     user: {
       email: newUser.email,
       subscription: newUser.subscription,
+      newUser: newUser.avatarURL,
     },
   });
 };
@@ -88,19 +98,51 @@ const updateUserSubscription = async (req, res) => {
   const { error } = subscriptionValidation.validate(req.body);
   if (error) {
     res.status(400).json({ message: error.message });
-    }
-    
-    const { _id } = req.user;
+  }
 
-    const updatedUser = await User.findByIdAndUpdate(_id, req.body, {
-        new: true,
-    });
-    
-    res.json({
-        id: req.body,
-        email: req.user.email,
-        subscription: updatedUser.subscription,
-      });
+  const { _id } = req.user;
+
+  const updatedUser = await User.findByIdAndUpdate(_id, req.body, {
+    new: true,
+  });
+
+  res.json({
+    id: req.body,
+    email: req.user.email,
+    subscription: updatedUser.subscription,
+  });
 };
 
-export { signupUser, loginUser, logoutUser, getCurrentUsers, updateUserSubscription};
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: oldPath, filename } = req.file;
+
+  await Jimp.read(oldPath)
+  .then((image) => {
+    console.log("Resizing image"); // Debug log
+    image.cover({ w: 250, h: 250 }).write(oldPath);
+    console.log("Image resized and saved to:", oldPath); // Debug log
+  })
+  .catch((error) => console.log(error));
+
+  const newPath = path.join("public", "avatars", filename);
+  console.log(newPath);
+  await fs.rename(oldPath, newPath);
+
+  let avatarURL = path.join("/avatars", filename);
+  console.log(avatarURL);
+  avatarURL = avatarURL.replace(/\\/g, "/");
+
+  await User.findByIdAndUpdate(_id, { avatarURL });
+
+  res.status(200).json({ avatarURL });
+};
+
+export {
+  signupUser,
+  loginUser,
+  logoutUser,
+  getCurrentUsers,
+  updateUserSubscription,
+  updateAvatar,
+};

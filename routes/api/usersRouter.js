@@ -1,6 +1,7 @@
 import express from "express";
-import { getCurrentUsers, loginUser, logoutUser, signupUser, updateUserSubscription } from "../../controllers/usersControllers.js";
+import { getCurrentUsers, loginUser, logoutUser, signupUser, updateAvatar, updateUserSubscription } from "../../controllers/usersControllers.js";
 import { authenticateToken } from "../../middlewares/authenticateToken.js";
+import { upload } from "../../middlewares/upload.js";
 
 const router = express.Router();
 
@@ -49,5 +50,13 @@ router.patch("/", authenticateToken, async (req, res, next) => {
     }
 })
 
+router.patch("/avatars", authenticateToken, upload.single("avatar"), async (req, res, next) => {
+    try {
+        const result = await updateAvatar(req, res, next);
+        return result;
+    } catch (error) {
+        next(error);
+    }
+})
 
 export { router };
