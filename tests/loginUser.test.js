@@ -1,8 +1,8 @@
-import bcrypt from "bcrypt";
+import { app } from "../app";
 import { jest } from "@jest/globals";
 import { User } from "../models/usersModel";
 import request from "supertest";
-import { app } from "../app";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 describe("Test @POST /api/users/login", () => {
